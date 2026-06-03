@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+aios:
+  # 模型配置现在通过启动页设置，保存在 aios-config.json
+  # 不再需要在这里配置 api-key
+
+  sandbox:
+    work-dir: ${AIOS_SANDBOX:./sandbox}
+    timeout-seconds: 10
+    # 危险命令黑名单(逗号分隔)
+    blocked-patterns: "rm -rf /,mkfs,dd if=,chmod 777 /,> /dev/sd"

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风云WindCloud · 初始化设置</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .setup-container {
+            width: 100%;
+            max-width: 520px;
+            padding: 40px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo h1 { font-size: 2rem; font-weight: 700; }
+        .logo h1 span { color: #38bdf8; }
+        .logo p { color: #64748b; margin-top: 8px; font-size: 0.9rem; }
+
+        .form-group { margin-bottom: 24px; }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .provider-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .provider-card {
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .provider-card:hover { border-color: #475569; background: #1e293b; }
+        .provider-card.selected { border-color: #38bdf8; background: #1e3a5f; }
+        .provider-card .icon { font-size: 2rem; margin-bottom: 8px; }
+        .provider-card .name { font-weight: 600; font-size: 1rem; }
+        .provider-card .desc { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+
+        select, input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        select:focus, input:focus { border-color: #38bdf8; }
+        select { cursor: pointer; }
+
+        .api-key-row {
+            display: flex;
+            gap: 8px;
+        }
+        .api-key-row input { flex: 1; }
+        .toggle-visibility {
+            padding: 12px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        .submit-btn:hover { background: #1d4ed8; }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 6px;
+        }
+        .hint a { color: #38bdf8; text-decoration: none; }
+        .hint a:hover { text-decoration: underline; }
+
+        .error-msg {
+            background: #7f1d1d;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #475569;
+            font-size: 0.85rem;
+        }
+        .step.active { color: #38bdf8; }
+        .step.done { color: #22c55e; }
+        .step-num {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 2px solid currentColor;
+        }
+        .step.active .step-num { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+        .step.done .step-num { background: #22c55e; color: #0f172a; border-color: #22c55e; }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="logo">
+            <h1>🐉 <span>大龙瞎</span></h1>
+            <p>首次运行 · 配置你的AI模型</p>
+        </div>
+
+        <div class="steps">
+            <div class="step active" id="step1">
+                <div class="step-num">1</div>
+                <span>选择模型</span>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-num">2</div>
+                <span>填写密钥</span>
+            </div>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <form id="setupForm">
+            <div class="form-group">
+                <label>选择模型提供商</label>
+                <div class="provider-grid">
+                    <div class="provider-card selected" data-provider="deepseek" onclick="selectProvider(this)">
+                        <div class="icon">🔵</div>
+                        <div class="name">DeepSeek</div>
+                        <div class="desc">性价比高，速度快</div>
+                    </div>
+                    <div class="provider-card" data-provider="qwen" onclick="selectProvider(this)">
+                        <div class="icon">🟣</div>
+                        <div class="name">通义千问</div>
+                        <div class="desc">阿里出品，中文强</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>选择具体模型</label>
+                <select id="modelSelect">
+                    <option value="deepseek-chat">deepseek-chat（推荐，性价比）</option>
+                    <option value="deepseek-reasoner">deepseek-reasoner（深度推理）</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>API Key</label>
+                <div class="api-key-row">
+                    <input type="password" id="apiKeyInput" placeholder="sk-..." required />
+                    <button type="button" class="toggle-visibility" onclick="toggleKey()">👁</button>
+                </div>
+                <div class="hint" id="keyHint">
+                    获取地址：<a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">开始使用</button>
+        </form>
+    </div>
+
+    <script>
+        const models = {
+            deepseek: [
+                { value: 'deepseek-chat', label: 'deepseek-chat（推荐，性价比）' },
+                { value: 'deepseek-reasoner', label: 'deepseek-reasoner（深度推理）' }
+            ],
+            qwen: [
+                { value: 'qwen-plus', label: 'qwen-plus（推荐，均衡）' },
+                { value: 'qwen-max', label: 'qwen-max（最强，贵）' },
+                { value: 'qwen-turbo', label: 'qwen-turbo（最快，便宜）' }
+            ]
+        };
+
+        const hints = {
+            deepseek: '获取地址：<a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a>',
+            qwen: '获取地址：<a href="https://bailian.console.aliyun.com" target="_blank">bailian.console.aliyun.com</a>'
+        };
+
+        let selectedProvider = 'deepseek';
+
+        function selectProvider(el) {
+            document.querySelectorAll('.provider-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedProvider = el.dataset.provider;
+
+            const select = document.getElementById('modelSelect');
+            select.innerHTML = models[selectedProvider].map(m =>
+                `<option value="${m.value}">${m.label}</option>`
+            ).join('');
+
+            document.getElementById('keyHint').innerHTML = hints[selectedProvider];
+        }
+
+        function toggleKey() {
+            const input = document.getElementById('apiKeyInput');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        document.getElementById('setupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            const model = document.getElementById('modelSelect').value;
+
+            if (!apiKey) { showError('请输入API Key'); return; }
+
+            const btn = e.target.querySelector('.submit-btn');
+            btn.disabled = true;
+            btn.textContent = '验证中...';
+
+            try {
+                const resp = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider: selectedProvider,
+                        model: model,
+                        apiKey: apiKey,
+                        setupComplete: true
+                    })
+                });
+
+                if (!resp.ok) throw new Error('保存失败');
+
+                const data = await resp.json();
+                if (data.setupComplete) {
+                    document.getElementById('step1').className = 'step done';
+                    document.getElementById('step2').className = 'step done';
+                    btn.textContent = '✅ 配置成功！正在跳转...';
+                    setTimeout(() => window.location.href = '/', 1500);
+                }
+            } catch (err) {
+                showError('配置保存失败: ' + err.message);
+                btn.disabled = false;
+                btn.textContent = '开始使用';
+            }
+        });
+    </script>
+</body>
+</html>
